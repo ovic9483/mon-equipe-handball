@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Suivi tâches - Hugo Jouvenet</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--line:#d9d9df;--text:#171717;--muted:#6b6b70}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:760px;margin:auto;padding:16px 14px 110px}
+h1{font-size:24px;margin:4px 0}.sub{color:var(--muted);margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff}
+textarea{min-height:70px;resize:vertical}
+.task-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.task-title{font-weight:700}
+.remove{border:0;background:#fbeaea;color:#a21a1a;border-radius:10px;padding:7px 9px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.duration{height:44px;border-radius:10px;background:#efeff4;display:flex;align-items:center;justify-content:center;font-weight:700}
+.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+button{padding:13px;border-radius:12px;font-size:16px;font-weight:700;border:1px solid var(--line);background:#fff}
+.primary{background:#111;color:#fff;border-color:#111}
+.actions{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(244,245,247,.94);border-top:1px solid var(--line);backdrop-filter:blur(12px)}
+.actionsin{max-width:760px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+#printSheet{display:none}
+@media(max-width:560px){.row3{grid-template-columns:1fr 1fr}.durbox{grid-column:1/-1}}
+@media print{
+body{background:#fff}.wrap,.actions{display:none!important}#printSheet{display:block!important}
+@page{size:A4;margin:10mm}
+#printSheet{font-family:Arial,sans-serif;color:#111}
+.ptitle{text-align:center;font-size:16px;font-weight:bold;margin-bottom:4px}
+.psub{text-align:center;font-size:8px;color:#555;margin-bottom:8px}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #888;padding:4px;font-size:7.5px;vertical-align:top}
+th{background:#eee}.taskrow td{height:27px}.summary{margin-top:7px}.comments{height:38px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Suivi des tâches quotidiennes</h1>
+<div class="sub">Hugo Jouvenet</div>
+
+<div class="card">
+  <div class="grid2">
+    <div><label>Date</label><input id="date" type="date"></div>
+    <div><label>Salarié</label><input value="Hugo Jouvenet" disabled></div>
+    <div><label>Heure de début</label><input id="dayStart" type="time"></div>
+    <div><label>Heure de fin</label><input id="dayEnd" type="time"></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button id="addTask" type="button">+ Ajouter une tâche</button>
+  <button id="clearBtn" type="button">Nouvelle journée</button>
+</div>
+
+<div id="tasks"></div>
+
+<div class="card">
+  <div class="grid2">
+    <div><label>Pause(s)</label><input id="breaks" placeholder="Ex. 45 min"></div>
+    <div><label>Temps total des tâches</label><div class="duration" id="total">0 min</div></div>
+  </div>
+  <div style="margin-top:10px"><label>Commentaires / points à reprendre</label><textarea id="comments"></textarea></div>
+  <div class="note">Sauvegarde automatique sur cet appareil.</div>
+</div>
+</div>
+
+<div class="actions">
+  <div class="actionsin">
+    <button id="saveBtn" type="button">Sauvegarder</button>
+    <button id="printBtn" type="button" class="primary">Exporter en PDF</button>
+  </div>
+</div>
+
+<div id="printSheet"></div>
+
+<script>
+(function(){
+  const STORAGE='hugo_jouvenet_tasks_v2';
+  const $=s=>document.querySelector(s);
+  const tasksEl=$('#tasks');
+
+  function pad(n){return String(n).padStart(2,'0')}
+  function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function diff(a,b){
+    if(!a||!b)return 0;
+    const A=a.split(':').map(Number),B=b.split(':').map(Number);
+    let x=A[0]*60+A[1],y=B[0]*60+B[1]; if(y<x)y+=1440; return y-x;
+  }
+  function fmt(m){if(!m)return '0 min';const h=Math.floor(m/60),r=m%60;return h?(h+' h'+(r?' '+r+' min':'')):(r+' min')}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+  function makeTask(data={}){
+    const el=document.createElement('div');
+    el.className='card task';
+    el.innerHTML=`
+      <div class="task-head"><div class="task-title">Tâche</div><button class="remove" type="button">Supprimer</button></div>
+      <label>Tâche réalisée</label><input class="name" value="${esc(data.name||'')}" placeholder="Ex. Préparation de commandes">
+      <div class="row3" style="margin-top:10px">
+        <div><label>Début</label><input class="start" type="time" value="${data.start||''}"></div>
+        <div><label>Fin</label><input class="end" type="time" value="${data.end||''}"></div>
+        <div class="durbox"><label>Temps consacré</label><div class="duration dur">0 min</div></div>
+      </div>
+      <div style="margin-top:10px"><label>Observations / résultat</label><textarea class="obs">${esc(data.obs||'')}</textarea></div>`;
+    el.querySelector('.remove').addEventListener('click',()=>{el.remove();renumber();update();save()});
+    el.querySelectorAll('input,textarea').forEach(x=>{
+      x.addEventListener('input',()=>{update();save()});
+      x.addEventListener('change',()=>{update();save()});
+    });
+    tasksEl.appendChild(el); renumber(); update();
+  }
+
+  function renumber(){document.querySelectorAll('.task').forEach((t,i)=>t.querySelector('.task-title').textContent='Tâche '+(i+1))}
+  function update(){
+    let total=0;
+    document.querySelectorAll('.task').forEach(t=>{
+      const m=diff(t.querySelector('.start').value,t.querySelector('.end').value);
+      t.querySelector('.dur').textContent=fmt(m); total+=m;
+    });
+    $('#total').textContent=fmt(total);
+  }
+  function data(){
+    return {
+      date:$('#date').value, dayStart:$('#dayStart').value, dayEnd:$('#dayEnd').value,
+      breaks:$('#breaks').value, comments:$('#comments').value,
+      tasks:[...document.querySelectorAll('.task')].map(t=>({
+        name:t.querySelector('.name').value,start:t.querySelector('.start').value,
+        end:t.querySelector('.end').value,obs:t.querySelector('.obs').value
+      }))
+    }
+  }
+  function save(){localStorage.setItem(STORAGE,JSON.stringify(data()))}
+  function load(){
+    let d={}; try{d=JSON.parse(localStorage.getItem(STORAGE)||'{}')}catch(e){}
+    $('#date').value=d.date||today(); $('#dayStart').value=d.dayStart||''; $('#dayEnd').value=d.dayEnd||'';
+    $('#breaks').value=d.breaks||''; $('#comments').value=d.comments||'';
+    tasksEl.innerHTML=''; (d.tasks&&d.tasks.length?d.tasks:[{}]).forEach(makeTask); update();
+  }
+
+  $('#addTask').addEventListener('click',()=>{makeTask({});save();setTimeout(()=>{const a=document.querySelectorAll('.task');a[a.length-1].scrollIntoView({behavior:'smooth',block:'center'})},50)});
+  $('#clearBtn').addEventListener('click',()=>{if(!confirm('Effacer la journée actuelle ?'))return;localStorage.removeItem(STORAGE);load();window.scrollTo({top:0,behavior:'smooth'})});
+  $('#saveBtn').addEventListener('click',()=>{save();alert('Saisie sauvegardée.')});
+
+  function buildPrint(){
+    const d=data(); let rows='',total=0;
+    d.tasks.forEach((t,i)=>{const m=diff(t.start,t.end);total+=m;rows+=`<tr class="taskrow"><td>${i+1}</td><td>${esc(t.name)}</td><td>${esc(t.start)}</td><td>${esc(t.end)}</td><td>${fmt(m)}</td><td>${esc(t.obs)}</td></tr>`});
+    let date=d.date?d.date.split('-').reverse().join('/'):'';
+    $('#printSheet').innerHTML=`
+      <div class="ptitle">FICHE DE SUIVI DES TÂCHES QUOTIDIENNES</div>
+      <div class="psub">Tâches réalisées et temps consacré</div>
+      <table><tr><td><b>Salarié :</b> Hugo Jouvenet</td><td><b>Date :</b> ${esc(date)}</td></tr>
+      <tr><td><b>Heure de début :</b> ${esc(d.dayStart)}</td><td><b>Heure de fin :</b> ${esc(d.dayEnd)}</td></tr></table>
+      <table style="margin-top:7px"><thead><tr><th>N°</th><th>Tâche réalisée</th><th>Début</th><th>Fin</th><th>Temps consacré</th><th>Observations / résultat</th></tr></thead><tbody>${rows}</tbody></table>
+      <table class="summary"><tr><td><b>TEMPS TOTAL :</b> ${fmt(total)}</td><td><b>Pause(s) :</b> ${esc(d.breaks)}</td></tr>
+      <tr><td colspan="2" class="comments"><b>Commentaires / points à reprendre :</b><br>${esc(d.comments)}</td></tr></table>`;
+  }
+  $('#printBtn').addEventListener('click',()=>{save();buildPrint();window.print()});
+  ['date','dayStart','dayEnd','breaks','comments'].forEach(id=>$('#'+id).addEventListener('input',save));
+
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  load();
+})();
+</script>
+</body>
+</html>
