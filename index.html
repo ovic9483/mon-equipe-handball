@@ -32,7 +32,7 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
 .row{display:flex;gap:8px}.row input,.search{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px}
 .add{background:var(--navy);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:800}
 .players{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.player{position:relative;border:1px solid var(--line);background:#f8fbfd;border-radius:10px;padding:9px 22px 9px 8px;text-align:center;transition:.15s ease}.player.selected{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:800}.player.selected .x{color:#fff}
+.player{position:relative;border:1px solid var(--line);background:#f8fbfd;border-radius:10px;padding:9px 22px 9px 8px;text-align:center;transition:.15s ease}.player.selected{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:800}.player.selected .x{color:#fff}.player.fixed{padding-right:8px}
 .player .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#8ea0b1;font-size:18px}
 .counter{margin-top:10px;background:#eef3f7;border-radius:10px;padding:11px;text-align:center;font-weight:800}
 .keepers{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;background:linear-gradient(#eef4f9,#e5edf5)}
@@ -88,8 +88,12 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
 
 <script>
 (function(){
-  var PKEY='hb_players_v5', LKEY='hb_lineup_v5';
-  var players=[], lineup={};
+  var CKEY='hb_custom_players_v6', LKEY='hb_lineup_v5';
+  var DEFAULT_PLAYERS=[
+    'Arnaud','Brachet','Calviac','Cédric','Christo','Eddy','Hugo','Joffrey',
+    'Landry','Loup','Manouba','Micka','Nico','Ovic','Pad','Peter','Yougo'
+  ];
+  var customPlayers=[], players=[], lineup={};
 
   function safeGet(key, fallback){
     try{
@@ -101,8 +105,20 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
     try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
   }
 
-  players=safeGet(PKEY,[]);
+  customPlayers=safeGet(CKEY,[]);
   lineup=safeGet(LKEY,{});
+
+  function rebuildPlayers(){
+    var seen={};
+    players=DEFAULT_PLAYERS.concat(customPlayers).filter(function(name){
+      var k=String(name).toLowerCase();
+      if(seen[k]) return false;
+      seen[k]=true;
+      return true;
+    });
+    players.sort(function(a,b){return a.localeCompare(b,'fr');});
+  }
+  rebuildPlayers();
 
   var playerName=document.getElementById('playerName');
   var search=document.getElementById('search');
@@ -110,7 +126,10 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
   var counter=document.getElementById('counter');
   var status=document.getElementById('status');
 
-  function save(){ safeSet(PKEY,players); safeSet(LKEY,lineup); }
+  function save(){
+    safeSet(CKEY,customPlayers);
+    safeSet(LKEY,lineup);
+  }
 
   function esc(s){
     return String(s).replace(/[&<>"']/g,function(c){
@@ -132,15 +151,19 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
     playersEl.innerHTML='';
     players.filter(function(n){return n.toLowerCase().indexOf(q)!==-1;}).forEach(function(name){
       var div=document.createElement('div');
-      div.className='player'+(selected.has(name)?' selected':'');
-      div.innerHTML='<span>'+esc(name)+'</span><button class="x" type="button">×</button>';
-      div.querySelector('.x').addEventListener('click',function(){
-        players=players.filter(function(p){return p!==name;});
-        Object.keys(lineup).forEach(function(pos){
-          lineup[pos]=(lineup[pos]||[]).map(function(v){return v===name?'':v;});
+      var isFixed=DEFAULT_PLAYERS.some(function(p){return p.toLowerCase()===name.toLowerCase();});
+      div.className='player'+(selected.has(name)?' selected':'')+(isFixed?' fixed':'');
+      div.innerHTML='<span>'+esc(name)+'</span>'+(isFixed?'':'<button class="x" type="button" aria-label="Supprimer '+esc(name)+'">×</button>');
+      if(!isFixed){
+        div.querySelector('.x').addEventListener('click',function(){
+          customPlayers=customPlayers.filter(function(p){return p.toLowerCase()!==name.toLowerCase();});
+          Object.keys(lineup).forEach(function(pos){
+            lineup[pos]=(lineup[pos]||[]).map(function(v){return v===name?'':v;});
+          });
+          rebuildPlayers();
+          save(); renderPlayers(); renderSelects();
         });
-        save(); renderPlayers(); renderSelects();
-      });
+      }
       playersEl.appendChild(div);
     });
   }
@@ -184,8 +207,8 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
     if(!name)return;
     var exists=players.some(function(p){return p.toLowerCase()===name.toLowerCase();});
     if(!exists){
-      players.push(name);
-      players.sort(function(a,b){return a.localeCompare(b,'fr');});
+      customPlayers.push(name);
+      rebuildPlayers();
     }
     playerName.value='';
     save(); renderPlayers(); renderSelects();
@@ -204,7 +227,7 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
   });
 
   document.getElementById('clearAll').addEventListener('click',function(){
-    players=[]; lineup={}; save(); renderPlayers(); renderSelects();
+    customPlayers=[]; lineup={}; rebuildPlayers(); save(); renderPlayers(); renderSelects();
   });
 
   renderPlayers(); renderSelects();
