@@ -3,20 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d2f55">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mon Équipe">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Mon Équipe Handball</title>
 <style>
-:root{--navy:#0d2f55;--blue:#1598cf;--orange:#f6a129;--bg:#eef3f7;--card:#fff;--line:#d8e1ea;--text:#10233c;--green:#3fb57b;--red:#e64c4c}
+:root{--navy:#0d2f55;--blue:#1598cf;--orange:#f6a129;--bg:#eef3f7;--card:#fff;--line:#d8e1ea;--text:#10233c;--green:#3fb57b;--red:#e64c4c;--amber:#f0b84b;--muted:#6f8090}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-.app{max-width:560px;margin:auto;background:#f8fafc;min-height:100vh}
-header{background:linear-gradient(135deg,#15578e,#0d2f55);color:white;padding:16px 12px 12px;position:sticky;top:0;z-index:20}
-.title{display:flex;gap:10px;align-items:center}.icon{font-size:28px}h1{font-size:21px;margin:0}.sub{font-size:13px;opacity:.9}
-.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px}
-button{font:inherit}
-.action{border:0;border-radius:11px;padding:10px 6px;color:white;font-weight:800}
-.green{background:var(--green)}.blue{background:#2e8df0}.red{background:var(--red)}
-main{padding:10px}
-.card{background:white;border-radius:16px;box-shadow:0 2px 10px rgba(16,35,60,.08);overflow:hidden;margin-bottom:12px}
+.app{max-width:620px;margin:auto;background:#f8fafc;min-height:100vh;padding-bottom:86px}
+header{background:linear-gradient(135deg,#15578e,#0d2f55);color:white;padding:15px 13px 12px;position:sticky;top:0;z-index:30}
+.title{display:flex;gap:10px;align-items:center} .icon{font-size:27px} h1{font-size:21px;margin:0} .sub{font-size:12px;opacity:.9}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.tabbtn{border:0;border-radius:11px;padding:10px 4px;background:rgba(255,255,255,.14);color:white;font-weight:800;font-size:12px}
+.tabbtn.active{background:white;color:var(--navy)}
+main{padding:10px} .tab{display:none} .tab.active{display:block}
+.card{background:white;border-radius:16px;box-shadow:0 2px 10px rgba(16,35,60,.08);margin-bottom:12px;overflow:hidden}
+.section{padding:14px} h2{font-size:18px;margin:0 0 10px} h3{font-size:14px;margin:0 0 8px;color:var(--navy)}
+.note{font-size:12px;color:var(--muted);line-height:1.4}
+.row{display:flex;gap:8px} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--text);font:inherit}
+textarea{min-height:80px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:10px 12px;font-weight:800;font:inherit}
+.primary{background:var(--navy);color:#fff} .green{background:var(--green);color:#fff} .red{background:var(--red);color:#fff} .ghost{background:#edf3f8;color:var(--navy)}
+.linkbtn{display:block;text-decoration:none;text-align:center}
+.players{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.player{border:1px solid var(--line);background:#f8fbfd;border-radius:12px;padding:10px;font-weight:700}
+.player small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.roster-row{display:grid;grid-template-columns:1fr 100px 70px;gap:7px;align-items:center;border-bottom:1px solid #edf2f6;padding:9px 0}
+.roster-row:last-child{border-bottom:0}
+.name{font-weight:800}
+.statuses{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.status{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 3px;font-size:11px;font-weight:800}
+.status.on.conv{background:var(--green);border-color:var(--green);color:white}
+.status.on.maybe{background:var(--amber);border-color:var(--amber);color:white}
+.status.on.abs{background:var(--red);border-color:var(--red);color:white}
+.counter{padding:11px;border-radius:11px;background:#eef3f7;text-align:center;font-weight:900;margin-top:10px}
+.counter.full{background:#e8f7ef;color:#147748}
+.counter.over{background:#fdeaea;color:#9c2525}
+.match-head{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:#eef3f7;font-size:11px;font-weight:800}
 .court{position:relative;width:100%;height:600px;background:linear-gradient(#21a7d8,#168fc7);border:4px solid #fff;overflow:hidden}
 .zone{position:absolute;top:0;left:14%;width:72%;height:170px;background:var(--orange);border:4px solid #fff;border-top:0;border-radius:0 0 46% 46%}
 .nine{position:absolute;top:90px;left:4%;width:92%;height:210px;border-bottom:5px dashed white;border-radius:0 0 48% 48%}
@@ -24,43 +53,81 @@ main{padding:10px}
 .pos{position:absolute;transform:translate(-50%,-50%);width:31%;min-width:105px;max-width:145px;text-align:center;z-index:6}
 .lab{display:inline-block;background:var(--navy);color:#fff;font-weight:800;padding:6px 12px;border-radius:8px;margin-bottom:5px}
 .slots{display:grid;grid-template-columns:1fr;gap:5px;width:100%}
-select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;padding:10px 2px;color:var(--navy);font-weight:700;text-align:center}
+.court select{border:2px solid white;background:#e5f1f9;color:var(--navy);font-weight:800;text-align:center;padding:9px 2px}
 .ag{left:13%;top:16%}.ad{left:87%;top:16%}.arg{left:27%;top:49%}.ard{left:73%;top:49%}.dc{left:50%;top:61%}.piv{left:50%;top:29%}.gb{left:50%;top:88%;width:44%;max-width:230px}
-.midline{position:absolute;left:0;right:0;bottom:70px;height:4px;background:white}
-.circle{position:absolute;left:44%;bottom:39px;width:12%;aspect-ratio:1;border:4px solid white;border-radius:50%}
-.section{padding:14px}.section h2{font-size:18px;margin:0 0 10px}
-.row{display:flex;gap:8px}.row input,.search{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px}
-.add{background:var(--navy);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:800}
-.players{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.player{position:relative;border:1px solid var(--line);background:#f8fbfd;border-radius:10px;padding:9px 22px 9px 8px;text-align:center;transition:.15s ease}.player.selected{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:800}.player.selected .x{color:#fff}.player.fixed{padding-right:8px}
-.player .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#8ea0b1;font-size:18px}
-.counter{margin-top:10px;background:#eef3f7;border-radius:10px;padding:11px;text-align:center;font-weight:800}
-.keepers{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;background:linear-gradient(#eef4f9,#e5edf5)}
-.kleft{font-size:18px;font-weight:800}.kslots{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:60%}
-.status{font-size:11px;text-align:center;color:#708090;padding:8px}
-@media(max-width:390px){.court{height:570px}.players{grid-template-columns:repeat(2,1fr)}.action{font-size:11px}.pos{min-width:92px}.lab{font-size:12px}.ag{left:13%;top:15%}.ad{left:87%;top:15%}.gb{top:89%;width:48%;}}
+.midline{position:absolute;left:0;right:0;bottom:70px;height:4px;background:white} .circle{position:absolute;left:44%;bottom:39px;width:12%;aspect-ratio:1;border:4px solid white;border-radius:50%}
+.bench{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chip{background:#edf3f8;color:var(--navy);padding:7px 9px;border-radius:999px;font-size:12px;font-weight:800}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.sharebox{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;line-height:1.45}
+.footerbar{position:fixed;left:0;right:0;bottom:0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(248,250,252,.96);border-top:1px solid var(--line);backdrop-filter:blur(12px);z-index:40}
+.footerin{max-width:620px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:420px){
+  .court{height:570px} .pos{min-width:92px} .lab{font-size:12px} .ag{left:13%;top:15%} .ad{left:87%;top:15%} .gb{top:89%;width:48%}
+  .roster-row{grid-template-columns:1fr 92px 60px} .roster-row select,.roster-row input{padding:8px 5px;font-size:12px}
+}
 </style>
-<meta name="theme-color" content="#0d2f55">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mon Équipe">
-<link rel="manifest" href="manifest.json">
 </head>
 <body>
 <div class="app">
 <header>
-  <div class="title"><div class="icon">🤾</div><div><h1>Mon Équipe Handball</h1><div class="sub">Compose ton équipe du week-end</div></div></div>
-  <div class="actions">
-    <button id="goList" class="action green">👥 Ma liste</button>
-    <button id="clearLineup" class="action blue">↻ Vider la compo</button>
-    <button id="clearAll" class="action red">🗑 Tout effacer</button>
+  <div class="title"><div class="icon">🤾</div><div><h1>Mon Équipe Handball</h1><div class="sub">Effectif • Convocation • Terrain</div></div></div>
+  <div class="tabs">
+    <button class="tabbtn active" data-tab="effectif">👥 Effectif</button>
+    <button class="tabbtn" data-tab="convocation">📋 Convocation</button>
+    <button class="tabbtn" data-tab="terrain">🤾 Terrain</button>
   </div>
 </header>
 
 <main>
+<section id="effectif" class="tab active">
+  <div class="card section">
+    <h2>Effectif fixe</h2>
+    <div class="note">La liste est intégrée à l'application et sera identique pour tous ceux qui ouvrent le lien. Les postes et numéros restent enregistrés sur chaque appareil.</div>
+    <div id="roster"></div>
+  </div>
+  <div class="card section">
+    <h3>Calendrier officiel</h3>
+    <div class="note" style="margin-bottom:9px">1ère Division Masculine Territoriale — saison 2026-2027.</div>
+    <a class="btn ghost linkbtn" href="https://www.ffhandball.fr/competitions/saison-2026-2027-22/departemental/1ere-division-masculine-territoriale-32715/poule-192782/" target="_blank" rel="noopener">Ouvrir le calendrier FFHandball ↗</a>
+  </div>
+</section>
+
+<section id="convocation" class="tab">
+  <div class="card section">
+    <h2>Match du week-end</h2>
+    <div class="match-head">
+      <input id="opponent" placeholder="Adversaire">
+      <select id="venue"><option value="Domicile">🏠 Domicile</option><option value="Extérieur">🚌 Extérieur</option></select>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <input id="matchDate" type="date">
+      <input id="matchTime" type="time">
+    </div>
+    <input id="matchPlace" style="margin-top:8px" placeholder="Lieu / gymnase (facultatif)">
+  </div>
+
+  <div class="card section">
+    <h2>Statut des joueurs</h2>
+    <div class="note">Appuie sur un statut. Le groupe est limité visuellement à 12 joueurs convoqués.</div>
+    <div id="convocationList"></div>
+    <div id="convCounter" class="counter">0 / 12 convoqués</div>
+  </div>
+
+  <div class="card section">
+    <h2>Partager la convocation</h2>
+    <div id="shareText" class="sharebox"></div>
+    <div class="actions">
+      <button id="copyText" class="btn primary">Copier le texte</button>
+      <button id="resetStatuses" class="btn ghost">Réinitialiser</button>
+    </div>
+  </div>
+</section>
+
+<section id="terrain" class="tab">
   <div class="card">
     <div class="court">
       <div class="goal"></div><div class="zone"></div><div class="nine"></div><div class="midline"></div><div class="circle"></div>
-
       <div class="pos ag" data-pos="AG"><div class="lab">AG</div><div class="slots"><select></select><select></select></div></div>
       <div class="pos ad" data-pos="AD"><div class="lab">AD</div><div class="slots"><select></select><select></select></div></div>
       <div class="pos arg" data-pos="ARG"><div class="lab">ARG</div><div class="slots"><select></select><select></select></div></div>
@@ -70,193 +137,167 @@ select{width:100%;border:2px solid white;background:#e5f1f9;border-radius:10px;p
       <div class="pos gb" data-pos="GB"><div class="lab">🥅 GARDIENS</div><div class="slots"><select></select><select></select></div></div>
     </div>
   </div>
-
-  <div id="list" class="card section">
-    <h2>Ma liste de joueurs</h2>
-    <input id="search" class="search" placeholder="Rechercher un joueur…">
-    <div class="row" style="margin-top:8px">
-      <input id="playerName" placeholder="Nom du joueur">
-      <button id="addPlayer" class="add">Ajouter</button>
+  <div class="card section">
+    <h2>Banc / convoqués non placés</h2>
+    <div id="bench" class="bench"></div>
+    <div id="lineupCounter" class="counter">0 joueur placé</div>
+    <div class="actions">
+      <button id="clearLineup" class="btn ghost">Vider le terrain</button>
+      <button id="showConvocation" class="btn primary">Voir la convocation</button>
     </div>
-    <div id="players" class="players"></div>
-    <div id="counter" class="counter">0 joueur sélectionné</div>
   </div>
-
-  <div id="status" class="status">Initialisation…</div>
+</section>
 </main>
+
+<div class="footerbar">
+  <div class="footerin">
+    <button id="quickConv" class="btn green">📋 Convocation</button>
+    <button id="quickTerrain" class="btn primary">🤾 Terrain</button>
+  </div>
+</div>
 </div>
 
 <script>
 (function(){
-  var CKEY='hb_custom_players_v6', LKEY='hb_lineup_v5';
-  var DEFAULT_PLAYERS=[
-    'Hugo J.',
-    'Landry R.',
-    'Kevin B.',
-    'Arthur C.',
-    'PAD',
-    'Cedric P.',
-    'Ovic',
-    'Antho C.',
-    'Eddy C.',
-    'Erwan N.',
-    'Nico C.',
-    'Adrien J.',
-    'Micka G.',
-    'Arnaud V.',
-    'Joffrey B.',
-    'Christo G.',
-    'Arthur M.',
-    'Peter D.',
-    'Loup G.'
-  ];
-  var customPlayers=[], players=[], lineup={};
+const DEFAULT_PLAYERS=["Hugo J.", "Landry R.", "Kevin B.", "Arthur C.", "PAD", "Cedric P.", "Ovic", "Antho C.", "Eddy C.", "Erwan N.", "Nico C.", "Adrien J.", "Micka G.", "Arnaud V.", "Joffrey B.", "Christo G.", "Arthur M.", "Peter D.", "Loup G."];
+const KEY='hb_v2_state_1';
+const POSITIONS=['GB','AG','ARG','DC','ARD','AD','PIV'];
+let state={
+  meta:{opponent:'',venue:'Domicile',date:'',time:'',place:''},
+  roster:{},
+  statuses:{},
+  lineup:{}
+};
 
-  function safeGet(key, fallback){
-    try{
-      var v=localStorage.getItem(key);
-      return v ? JSON.parse(v) : fallback;
-    }catch(e){ return fallback; }
-  }
-  function safeSet(key, value){
-    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
-  }
+function load(){
+  try{ const s=JSON.parse(localStorage.getItem(KEY)||'{}'); state=Object.assign(state,s); }catch(e){}
+  DEFAULT_PLAYERS.forEach(n=>{
+    if(!state.roster[n]) state.roster[n]={position:'',number:''};
+    if(!state.statuses[n]) state.statuses[n]='';
+  });
+}
+function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tab(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===name));
+  document.querySelectorAll('.tabbtn').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.tabbtn').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.getElementById('quickConv').onclick=()=>tab('convocation');
+document.getElementById('quickTerrain').onclick=()=>tab('terrain');
+document.getElementById('showConvocation').onclick=()=>tab('convocation');
 
-  customPlayers=safeGet(CKEY,[]);
-  lineup=safeGet(LKEY,{});
+function renderRoster(){
+  const el=document.getElementById('roster'); el.innerHTML='';
+  DEFAULT_PLAYERS.forEach(name=>{
+    const d=state.roster[name]||{};
+    const row=document.createElement('div'); row.className='roster-row';
+    row.innerHTML='<div class="name">'+esc(name)+'</div>'+
+      '<select class="rpos"><option value="">Poste</option><option>GB</option><option>AG</option><option>ARG</option><option>DC</option><option>ARD</option><option>AD</option><option>PIV</option></select>'+
+      '<input class="rnum" inputmode="numeric" placeholder="N°" value="'+esc(d.number||'')+'">';
+    const ps=row.querySelector('.rpos'); ps.value=d.position||'';
+    ps.onchange=()=>{state.roster[name].position=ps.value;save();renderSelects();};
+    row.querySelector('.rnum').oninput=e=>{state.roster[name].number=e.target.value;save();renderShare();};
+    el.appendChild(row);
+  });
+}
 
-  function rebuildPlayers(){
-    var seen={};
-    players=DEFAULT_PLAYERS.concat(customPlayers).filter(function(name){
-      var k=String(name).toLowerCase();
-      if(seen[k]) return false;
-      seen[k]=true;
-      return true;
-    });
-    players.sort(function(a,b){return a.localeCompare(b,'fr');});
-  }
-  rebuildPlayers();
+function setStatus(name,value){
+  state.statuses[name]=state.statuses[name]===value?'':value; save();
+  renderConvocation(); renderSelects(); renderBench(); renderShare();
+}
+function renderConvocation(){
+  const el=document.getElementById('convocationList'); el.innerHTML='';
+  DEFAULT_PLAYERS.forEach(name=>{
+    const row=document.createElement('div'); row.className='roster-row';
+    const st=state.statuses[name]||'';
+    row.innerHTML='<div><div class="name">'+esc(name)+'</div><small class="note">'+esc((state.roster[name]||{}).position||'Poste non renseigné')+'</small></div>'+
+      '<div class="statuses" style="grid-column:2/4">'+
+      '<button class="status conv '+(st==='conv'?'on':'')+'">Convoqué</button>'+
+      '<button class="status maybe '+(st==='maybe'?'on':'')+'">Incertain</button>'+
+      '<button class="status abs '+(st==='abs'?'on':'')+'">Absent</button></div>';
+    const bs=row.querySelectorAll('.status');
+    bs[0].onclick=()=>setStatus(name,'conv'); bs[1].onclick=()=>setStatus(name,'maybe'); bs[2].onclick=()=>setStatus(name,'abs');
+    el.appendChild(row);
+  });
+  const n=DEFAULT_PLAYERS.filter(x=>state.statuses[x]==='conv').length;
+  const c=document.getElementById('convCounter'); c.textContent=n+' / 12 convoqués'; c.className='counter '+(n===12?'full':n>12?'over':'');
+}
 
-  var playerName=document.getElementById('playerName');
-  var search=document.getElementById('search');
-  var playersEl=document.getElementById('players');
-  var counter=document.getElementById('counter');
-  var status=document.getElementById('status');
-
-  function save(){
-    safeSet(CKEY,customPlayers);
-    safeSet(LKEY,lineup);
-  }
-
-  function esc(s){
-    return String(s).replace(/[&<>"']/g,function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-    });
-  }
-
-  function getSelectedPlayers(){
-    var s=new Set();
-    Object.keys(lineup).forEach(function(k){
-      (lineup[k]||[]).forEach(function(n){ if(n) s.add(n); });
-    });
-    return s;
-  }
-
-  function renderPlayers(){
-    var q=(search.value||'').trim().toLowerCase();
-    var selected=getSelectedPlayers();
-    playersEl.innerHTML='';
-    players.filter(function(n){return n.toLowerCase().indexOf(q)!==-1;}).forEach(function(name){
-      var div=document.createElement('div');
-      var isFixed=DEFAULT_PLAYERS.some(function(p){return p.toLowerCase()===name.toLowerCase();});
-      div.className='player'+(selected.has(name)?' selected':'')+(isFixed?' fixed':'');
-      div.innerHTML='<span>'+esc(name)+'</span>'+(isFixed?'':'<button class="x" type="button" aria-label="Supprimer '+esc(name)+'">×</button>');
-      if(!isFixed){
-        div.querySelector('.x').addEventListener('click',function(){
-          customPlayers=customPlayers.filter(function(p){return p.toLowerCase()!==name.toLowerCase();});
-          Object.keys(lineup).forEach(function(pos){
-            lineup[pos]=(lineup[pos]||[]).map(function(v){return v===name?'':v;});
-          });
-          rebuildPlayers();
-          save(); renderPlayers(); renderSelects();
-        });
-      }
-      playersEl.appendChild(div);
-    });
-  }
-
-  function renderSelects(){
-    document.querySelectorAll('[data-pos]').forEach(function(block){
-      var pos=block.getAttribute('data-pos');
-      if(!lineup[pos]) lineup[pos]=['',''];
-      var sels=block.querySelectorAll('select');
-      sels.forEach(function(sel,i){
-        var current=lineup[pos][i]||'';
-        sel.innerHTML='';
-        var empty=document.createElement('option'); empty.value=''; empty.textContent='+'; sel.appendChild(empty);
-        players.forEach(function(name){
-          var o=document.createElement('option');
-          o.value=name; o.textContent=name;
-          if(name===current) o.selected=true;
-          sel.appendChild(o);
-        });
-        sel.value=current;
-        sel.onchange=function(){
-          lineup[pos][i]=sel.value;
-          save(); updateCounter(); renderPlayers();
-        };
+function eligibleFor(pos){
+  const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
+  return conv.length?conv:DEFAULT_PLAYERS;
+}
+function renderSelects(){
+  document.querySelectorAll('[data-pos]').forEach(block=>{
+    const pos=block.dataset.pos;
+    if(!state.lineup[pos]) state.lineup[pos]=['',''];
+    block.querySelectorAll('select').forEach((sel,i)=>{
+      const current=state.lineup[pos][i]||'';
+      sel.innerHTML='<option value="">+</option>';
+      eligibleFor(pos).forEach(name=>{
+        const o=document.createElement('option'); o.value=name;
+        const num=(state.roster[name]||{}).number;
+        o.textContent=(num?'#'+num+' ':'')+name;
+        sel.appendChild(o);
       });
+      if([...sel.options].some(o=>o.value===current)) sel.value=current; else {state.lineup[pos][i]=''; sel.value='';}
+      sel.onchange=()=>{state.lineup[pos][i]=sel.value;save();renderBench();};
     });
-    save(); updateCounter();
-  }
-
-  function updateCounter(){
-    var s=new Set();
-    Object.keys(lineup).forEach(function(k){
-      (lineup[k]||[]).forEach(function(n){if(n)s.add(n);});
-    });
-    var c=s.size;
-    counter.textContent=c+' joueur'+(c>1?'s':'')+' sélectionné'+(c>1?'s':'');
-  }
-
-  function addPlayer(){
-    var name=(playerName.value||'').trim();
-    if(!name)return;
-    var exists=players.some(function(p){return p.toLowerCase()===name.toLowerCase();});
-    if(!exists){
-      customPlayers.push(name);
-      rebuildPlayers();
-    }
-    playerName.value='';
-    save(); renderPlayers(); renderSelects();
-  }
-
-  document.getElementById('addPlayer').addEventListener('click',addPlayer);
-  playerName.addEventListener('keydown',function(e){if(e.key==='Enter')addPlayer();});
-  search.addEventListener('input',renderPlayers);
-
-  document.getElementById('goList').addEventListener('click',function(){
-    document.getElementById('list').scrollIntoView({behavior:'smooth',block:'start'});
   });
+  save(); renderBench();
+}
 
-  document.getElementById('clearLineup').addEventListener('click',function(){
-    lineup={}; save(); renderSelects(); renderPlayers();
+function renderBench(){
+  const placed=new Set();
+  Object.values(state.lineup).forEach(arr=>(arr||[]).forEach(n=>{if(n)placed.add(n);}));
+  const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
+  const source=conv.length?conv:DEFAULT_PLAYERS;
+  const bench=source.filter(n=>!placed.has(n));
+  const el=document.getElementById('bench'); el.innerHTML=bench.length?bench.map(n=>'<span class="chip">'+esc(n)+'</span>').join(''):'<span class="note">Tous les convoqués sont placés.</span>';
+  document.getElementById('lineupCounter').textContent=placed.size+' joueur'+(placed.size>1?'s':'')+' placé'+(placed.size>1?'s':'');
+}
+
+function syncMeta(){
+  const map={opponent:'opponent',venue:'venue',date:'matchDate',time:'matchTime',place:'matchPlace'};
+  Object.keys(map).forEach(k=>{
+    const e=document.getElementById(map[k]); e.value=state.meta[k]||'';
+    e.oninput=e2=>{state.meta[k]=e2.target.value;save();renderShare();};
+    e.onchange=e2=>{state.meta[k]=e2.target.value;save();renderShare();};
   });
-
-  document.getElementById('clearAll').addEventListener('click',function(){
-    customPlayers=[]; lineup={}; rebuildPlayers(); save(); renderPlayers(); renderSelects();
+}
+function renderShare(){
+  const m=state.meta;
+  const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
+  const maybe=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='maybe');
+  let lines=['🤾 CONVOCATION – SENIORS M'];
+  if(m.opponent) lines.push((m.venue==='Domicile'?'🏠':'🚌')+' '+m.venue+' vs '+m.opponent);
+  if(m.date||m.time) lines.push('📅 '+(m.date||'')+(m.time?' à '+m.time:''));
+  if(m.place) lines.push('📍 '+m.place);
+  lines.push('');
+  lines.push('✅ Convoqués ('+conv.length+') :');
+  conv.forEach(n=>{
+    const num=(state.roster[n]||{}).number;
+    lines.push('• '+(num?'#'+num+' ':'')+n);
   });
+  if(maybe.length){lines.push('');lines.push('🟠 Incertains : '+maybe.join(', '));}
+  document.getElementById('shareText').textContent=lines.join('\n');
+}
 
-  renderPlayers(); renderSelects();
-  status.textContent='Application prête ✓';
+document.getElementById('copyText').onclick=async()=>{
+  const txt=document.getElementById('shareText').textContent;
+  try{await navigator.clipboard.writeText(txt); document.getElementById('copyText').textContent='Copié ✓'; setTimeout(()=>document.getElementById('copyText').textContent='Copier le texte',1200);}
+  catch(e){alert(txt);}
+};
+document.getElementById('resetStatuses').onclick=()=>{ if(confirm('Réinitialiser les statuts de convocation ?')){state.statuses={};DEFAULT_PLAYERS.forEach(n=>state.statuses[n]='');save();renderConvocation();renderSelects();renderShare();} };
+document.getElementById('clearLineup').onclick=()=>{state.lineup={};save();renderSelects();};
+
+load(); renderRoster(); syncMeta(); renderConvocation(); renderSelects(); renderShare();
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
-  });
-}
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
