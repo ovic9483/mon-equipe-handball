@@ -17,7 +17,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ari
 .app{max-width:620px;margin:auto;background:#f8fafc;min-height:100vh;padding-bottom:86px}
 header{background:linear-gradient(135deg,#15578e,#0d2f55);color:white;padding:15px 13px 12px;position:sticky;top:0;z-index:30}
 .title{display:flex;gap:10px;align-items:center} .icon{font-size:27px} h1{font-size:21px;margin:0} .sub{font-size:12px;opacity:.9}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .tabbtn{border:0;border-radius:11px;padding:10px 4px;background:rgba(255,255,255,.14);color:white;font-weight:800;font-size:12px}
 .tabbtn.active{background:white;color:var(--navy)}
 main{padding:10px} .tab{display:none} .tab.active{display:block}
@@ -33,7 +33,7 @@ textarea{min-height:80px;resize:vertical}
 .players{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
 .player{border:1px solid var(--line);background:#f8fbfd;border-radius:12px;padding:10px;font-weight:700}
 .player small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.roster-row{display:grid;grid-template-columns:1fr 100px 70px;gap:7px;align-items:center;border-bottom:1px solid #edf2f6;padding:9px 0}
+.roster-row{display:grid;grid-template-columns:1fr 1.6fr 64px;gap:7px;align-items:center;border-bottom:1px solid #edf2f6;padding:9px 0}.pos3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.pos3 select{padding:8px 4px;font-size:12px}
 .roster-row:last-child{border-bottom:0}
 .name{font-weight:800}
 .statuses{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -64,17 +64,28 @@ textarea{min-height:80px;resize:vertical}
 .footerin{max-width:620px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:420px){
   .court{height:570px} .pos{min-width:92px} .lab{font-size:12px} .ag{left:13%;top:15%} .ad{left:87%;top:15%} .gb{top:89%;width:48%}
-  .roster-row{grid-template-columns:1fr 92px 60px} .roster-row select,.roster-row input{padding:8px 5px;font-size:12px}
+  .roster-row{grid-template-columns:1fr 1.7fr 54px}.pos3{gap:4px}.pos3 select{padding:7px 2px;font-size:11px}.roster-row input{padding:8px 4px;font-size:12px}
 }
+
+.calendar-row{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid #edf2f6}
+.calendar-row:last-child{border-bottom:0}
+.jbadge{background:var(--navy);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;min-height:48px}
+.matchline{font-weight:800;font-size:14px}
+.matchmeta{font-size:12px;color:var(--muted);margin-top:3px}
+.calform{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
+.calform .wide{grid-column:1/-1}
+.autobox{background:#edf5fb;border:1px solid #cddfeb;border-radius:12px;padding:11px;margin-top:9px}
+
 </style>
 </head>
 <body>
 <div class="app">
 <header>
-  <div class="title"><div class="icon">🤾</div><div><h1>Mon Équipe Handball</h1><div class="sub">Effectif • Convocation • Terrain</div></div></div>
+  <div class="title"><div class="icon">🤾</div><div><h1>Mon Équipe Handball</h1><div class="sub">Effectif • Calendrier • Convocation • Terrain</div></div></div>
   <div class="tabs">
     <button class="tabbtn active" data-tab="effectif">👥 Effectif</button>
-    <button class="tabbtn" data-tab="convocation">📋 Convocation</button>
+    <button class="tabbtn" data-tab="calendrier">📅 Calendrier</button>
+    <button class="tabbtn" data-tab="convocation">📋 Convoc.</button>
     <button class="tabbtn" data-tab="terrain">🤾 Terrain</button>
   </div>
 </header>
@@ -83,7 +94,7 @@ textarea{min-height:80px;resize:vertical}
 <section id="effectif" class="tab active">
   <div class="card section">
     <h2>Effectif fixe</h2>
-    <div class="note">La liste est intégrée à l'application et sera identique pour tous ceux qui ouvrent le lien. Les postes et numéros restent enregistrés sur chaque appareil.</div>
+    <div class="note">La liste est intégrée à l'application. Chaque joueur peut avoir jusqu’à 3 postes sur le terrain.</div>
     <div id="roster"></div>
   </div>
   <div class="card section">
@@ -93,18 +104,37 @@ textarea{min-height:80px;resize:vertical}
   </div>
 </section>
 
+
+<section id="calendrier" class="tab">
+  <div class="card section">
+    <h2>Calendrier championnat</h2>
+    <div class="note">Version test : tu peux renseigner une fois les journées depuis le calendrier FFHandball. Elles sont ensuite réutilisées automatiquement dans les convocations.</div>
+    <a class="btn ghost linkbtn" style="margin-top:10px" href="https://www.ffhandball.fr/competitions/saison-2026-2027-22/departemental/1ere-division-masculine-territoriale-32715/poule-192782/" target="_blank" rel="noopener">Ouvrir le calendrier FFHandball ↗</a>
+  </div>
+  <div class="card section">
+    <div class="row" style="align-items:center;justify-content:space-between">
+      <h2 style="margin:0">Journées</h2>
+      <select id="calendarCount" style="width:105px">
+        <option value="14">J1 → J14</option>
+        <option value="16">J1 → J16</option>
+        <option value="18" selected>J1 → J18</option>
+        <option value="20">J1 → J20</option>
+        <option value="22">J1 → J22</option>
+      </select>
+    </div>
+    <div id="calendarList"></div>
+  </div>
+</section>
+
 <section id="convocation" class="tab">
   <div class="card section">
     <h2>Match du week-end</h2>
-    <div class="match-head">
-      <input id="opponent" placeholder="Adversaire">
-      <select id="venue"><option value="Domicile">🏠 Domicile</option><option value="Extérieur">🚌 Extérieur</option></select>
+    <label class="note">Sélectionne uniquement la journée</label>
+    <select id="matchDay" style="margin-top:5px"></select>
+    <div id="autoMatch" class="autobox">
+      <div class="matchline">Choisis une journée</div>
+      <div class="matchmeta">Les informations du match s’afficheront automatiquement.</div>
     </div>
-    <div class="grid2" style="margin-top:8px">
-      <input id="matchDate" type="date">
-      <input id="matchTime" type="time">
-    </div>
-    <input id="matchPlace" style="margin-top:8px" placeholder="Lieu / gymnase (facultatif)">
   </div>
 
   <div class="card section">
@@ -163,7 +193,9 @@ const DEFAULT_PLAYERS=["Hugo J.", "Landry R.", "Kevin B.", "Arthur C.", "PAD", "
 const KEY='hb_v2_state_1';
 const POSITIONS=['GB','AG','ARG','DC','ARD','AD','PIV'];
 let state={
-  meta:{opponent:'',venue:'Domicile',date:'',time:'',place:''},
+  meta:{opponent:'',venue:'Domicile',date:'',time:'',place:'',day:''},
+  calendar:{},
+  calendarCount:18,
   roster:{},
   statuses:{},
   lineup:{}
@@ -172,7 +204,11 @@ let state={
 function load(){
   try{ const s=JSON.parse(localStorage.getItem(KEY)||'{}'); state=Object.assign(state,s); }catch(e){}
   DEFAULT_PLAYERS.forEach(n=>{
-    if(!state.roster[n]) state.roster[n]={position:'',number:''};
+    if(!state.roster[n]) state.roster[n]={positions:[],number:''};
+    if(!Array.isArray(state.roster[n].positions)){
+      state.roster[n].positions=state.roster[n].position ? [state.roster[n].position] : [];
+      delete state.roster[n].position;
+    }
     if(!state.statuses[n]) state.statuses[n]='';
   });
 }
@@ -190,15 +226,22 @@ document.getElementById('showConvocation').onclick=()=>tab('convocation');
 
 function renderRoster(){
   const el=document.getElementById('roster'); el.innerHTML='';
+  const opts='<option value="">—</option><option>GB</option><option>AG</option><option>ARG</option><option>DC</option><option>ARD</option><option>AD</option><option>PIV</option>';
   DEFAULT_PLAYERS.forEach(name=>{
-    const d=state.roster[name]||{};
+    const d=state.roster[name]||{positions:[],number:''};
     const row=document.createElement('div'); row.className='roster-row';
     row.innerHTML='<div class="name">'+esc(name)+'</div>'+
-      '<select class="rpos"><option value="">Poste</option><option>GB</option><option>AG</option><option>ARG</option><option>DC</option><option>ARD</option><option>AD</option><option>PIV</option></select>'+
+      '<div class="pos3"><select class="rpos">'+opts+'</select><select class="rpos">'+opts+'</select><select class="rpos">'+opts+'</select></div>'+
       '<input class="rnum" inputmode="numeric" placeholder="N°" value="'+esc(d.number||'')+'">';
-    const ps=row.querySelector('.rpos'); ps.value=d.position||'';
-    ps.onchange=()=>{state.roster[name].position=ps.value;save();renderSelects();};
-    row.querySelector('.rnum').oninput=e=>{state.roster[name].number=e.target.value;save();renderShare();};
+    const sels=[...row.querySelectorAll('.rpos')];
+    sels.forEach((ps,i)=>{
+      ps.value=(d.positions||[])[i]||'';
+      ps.onchange=()=>{
+        state.roster[name].positions=[...new Set(sels.map(s=>s.value).filter(Boolean))].slice(0,3);
+        save(); renderRoster(); renderConvocation(); renderSelects();
+      };
+    });
+    row.querySelector('.rnum').oninput=e=>{state.roster[name].number=e.target.value;save();renderShare();renderSelects();};
     el.appendChild(row);
   });
 }
@@ -212,7 +255,7 @@ function renderConvocation(){
   DEFAULT_PLAYERS.forEach(name=>{
     const row=document.createElement('div'); row.className='roster-row';
     const st=state.statuses[name]||'';
-    row.innerHTML='<div><div class="name">'+esc(name)+'</div><small class="note">'+esc((state.roster[name]||{}).position||'Poste non renseigné')+'</small></div>'+
+    row.innerHTML='<div><div class="name">'+esc(name)+'</div><small class="note">'+esc((((state.roster[name]||{}).positions||[]).join(' • '))||'Poste non renseigné')+'</small></div>'+
       '<div class="statuses" style="grid-column:2/4">'+
       '<button class="status conv '+(st==='conv'?'on':'')+'">Convoqué</button>'+
       '<button class="status maybe '+(st==='maybe'?'on':'')+'">Incertain</button>'+
@@ -227,7 +270,11 @@ function renderConvocation(){
 
 function eligibleFor(pos){
   const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
-  return conv.length?conv:DEFAULT_PLAYERS;
+  const source=conv.length?conv:DEFAULT_PLAYERS;
+  return source.filter(n=>{
+    const ps=(state.roster[n]||{}).positions||[];
+    return ps.length===0 || ps.includes(pos);
+  });
 }
 function renderSelects(){
   document.querySelectorAll('[data-pos]').forEach(block=>{
@@ -259,19 +306,89 @@ function renderBench(){
   document.getElementById('lineupCounter').textContent=placed.size+' joueur'+(placed.size>1?'s':'')+' placé'+(placed.size>1?'s':'');
 }
 
-function syncMeta(){
-  const map={opponent:'opponent',venue:'venue',date:'matchDate',time:'matchTime',place:'matchPlace'};
-  Object.keys(map).forEach(k=>{
-    const e=document.getElementById(map[k]); e.value=state.meta[k]||'';
-    e.oninput=e2=>{state.meta[k]=e2.target.value;save();renderShare();};
-    e.onchange=e2=>{state.meta[k]=e2.target.value;save();renderShare();};
-  });
+function initCalendar(){
+  if(!state.calendar) state.calendar={};
+  if(!state.calendarCount) state.calendarCount=18;
+  const count=document.getElementById('calendarCount');
+  count.value=String(state.calendarCount);
+  count.onchange=()=>{state.calendarCount=Number(count.value);save();renderCalendar();renderDaySelect();};
+  renderCalendar();
+  renderDaySelect();
+}
+
+function renderCalendar(){
+  const el=document.getElementById('calendarList'); el.innerHTML='';
+  for(let j=1;j<=state.calendarCount;j++){
+    const d=state.calendar[j]||{opponent:'',venue:'Domicile',date:'',time:'',place:''};
+    const row=document.createElement('div'); row.className='calendar-row';
+    row.innerHTML='<div class="jbadge">J'+j+'</div><div>'+
+      '<div class="matchline">'+(d.opponent?esc(d.opponent):'Journée à renseigner')+'</div>'+
+      '<div class="matchmeta">'+(d.date?esc(d.date):'Date non renseignée')+(d.time?' • '+esc(d.time):'')+(d.opponent?' • '+esc(d.venue):'')+'</div>'+
+      '<div class="calform">'+
+        '<input class="opp wide" placeholder="Adversaire" value="'+esc(d.opponent||'')+'">'+
+        '<select class="ven"><option>Domicile</option><option>Extérieur</option><option>Exempt</option></select>'+
+        '<input class="date" type="date" value="'+esc(d.date||'')+'">'+
+        '<input class="time" type="time" value="'+esc(d.time||'')+'">'+
+        '<input class="place wide" placeholder="Lieu / gymnase" value="'+esc(d.place||'')+'">'+
+      '</div></div>';
+    row.querySelector('.ven').value=d.venue||'Domicile';
+    const saveRow=()=>{
+      state.calendar[j]={
+        opponent:row.querySelector('.opp').value.trim(),
+        venue:row.querySelector('.ven').value,
+        date:row.querySelector('.date').value,
+        time:row.querySelector('.time').value,
+        place:row.querySelector('.place').value.trim()
+      };
+      save(); renderDaySelect(); renderAutoMatch(); renderShare();
+    };
+    row.querySelectorAll('input,select').forEach(x=>{x.onchange=saveRow;x.oninput=saveRow;});
+    el.appendChild(row);
+  }
+}
+
+function renderDaySelect(){
+  const s=document.getElementById('matchDay');
+  const current=String(state.meta.day||'');
+  s.innerHTML='<option value="">— Choisir une journée —</option>';
+  for(let j=1;j<=state.calendarCount;j++){
+    const d=state.calendar[j]||{};
+    const o=document.createElement('option');
+    o.value=String(j);
+    o.textContent='J'+j+(d.opponent?' — '+d.opponent:'');
+    s.appendChild(o);
+  }
+  s.value=current;
+  s.onchange=()=>{
+    state.meta.day=s.value;
+    const d=state.calendar[s.value]||{};
+    state.meta.opponent=d.opponent||'';
+    state.meta.venue=d.venue||'Domicile';
+    state.meta.date=d.date||'';
+    state.meta.time=d.time||'';
+    state.meta.place=d.place||'';
+    save(); renderAutoMatch(); renderShare();
+  };
+  renderAutoMatch();
+}
+
+function renderAutoMatch(){
+  const box=document.getElementById('autoMatch');
+  const j=state.meta.day;
+  if(!j){
+    box.innerHTML='<div class="matchline">Choisis une journée</div><div class="matchmeta">Les informations du match s’afficheront automatiquement.</div>';
+    return;
+  }
+  const d=state.calendar[j]||{};
+  const icon=d.venue==='Domicile'?'🏠':d.venue==='Extérieur'?'🚌':'⏸️';
+  box.innerHTML='<div class="matchline">J'+esc(j)+' • '+icon+' '+esc(d.venue||'')+(d.opponent?' • '+esc(d.opponent):'')+'</div>'+
+    '<div class="matchmeta">'+(d.date?esc(d.date):'Date non renseignée')+(d.time?' à '+esc(d.time):'')+(d.place?' • '+esc(d.place):'')+'</div>';
 }
 function renderShare(){
   const m=state.meta;
   const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
   const maybe=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='maybe');
-  let lines=['🤾 CONVOCATION – SENIORS M'];
+  let lines=['🤾 CONVOCATION – SENIORS M'+(m.day?' • J'+m.day:'')];
   if(m.opponent) lines.push((m.venue==='Domicile'?'🏠':'🚌')+' '+m.venue+' vs '+m.opponent);
   if(m.date||m.time) lines.push('📅 '+(m.date||'')+(m.time?' à '+m.time:''));
   if(m.place) lines.push('📍 '+m.place);
@@ -293,7 +410,7 @@ document.getElementById('copyText').onclick=async()=>{
 document.getElementById('resetStatuses').onclick=()=>{ if(confirm('Réinitialiser les statuts de convocation ?')){state.statuses={};DEFAULT_PLAYERS.forEach(n=>state.statuses[n]='');save();renderConvocation();renderSelects();renderShare();} };
 document.getElementById('clearLineup').onclick=()=>{state.lineup={};save();renderSelects();};
 
-load(); renderRoster(); syncMeta(); renderConvocation(); renderSelects(); renderShare();
+load(); renderRoster(); initCalendar(); renderConvocation(); renderSelects(); renderShare();
 })();
 </script>
 <script>

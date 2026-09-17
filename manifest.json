@@ -1,7 +1,7 @@
 {
   "name": "Mon Équipe Handball",
   "short_name": "Mon Équipe",
-  "description": "Effectif, convocation et composition handball",
+  "description": "Effectif, calendrier, convocations et composition handball",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
