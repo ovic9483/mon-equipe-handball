@@ -1,0 +1,26 @@
+MON ÉQUIPE HANDBALL — EFFECTIF PARTAGÉ
+
+Contenu à envoyer sur GitHub :
+- index.html
+- manifest.json
+- sw.js
+- config.js
+
+À conserver dans GitHub :
+- icon-192.png
+- icon-512.png
+
+Fichier supabase_setup.sql :
+À exécuter une seule fois dans l'éditeur SQL de Supabase.
+
+Ensuite, renseigner dans config.js :
+SUPABASE_URL
+SUPABASE_ANON_KEY
+
+La clé publique/publishable/anon peut être utilisée côté navigateur.
+Ne jamais mettre une clé service_role dans config.js.
+
+Fonctionnement :
+- lecture de l'effectif : publique
+- ajout/modification/suppression : utilisateur Supabase authentifié uniquement
+- calendrier, convocations et terrain : restent enregistrés localement pour cette version test

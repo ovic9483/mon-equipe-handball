@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Mon Équipe">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <title>Mon Équipe Handball</title>
 <style>
 :root{--navy:#0d2f55;--blue:#1598cf;--orange:#f6a129;--bg:#eef3f7;--card:#fff;--line:#d8e1ea;--text:#10233c;--green:#3fb57b;--red:#e64c4c;--amber:#f0b84b;--muted:#6f8090}
@@ -33,7 +35,7 @@ textarea{min-height:80px;resize:vertical}
 .players{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
 .player{border:1px solid var(--line);background:#f8fbfd;border-radius:12px;padding:10px;font-weight:700}
 .player small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.roster-row{display:grid;grid-template-columns:1fr 1.6fr 64px;gap:7px;align-items:center;border-bottom:1px solid #edf2f6;padding:9px 0}.pos3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.pos3 select{padding:8px 4px;font-size:12px}
+.roster-row{display:grid;grid-template-columns:1fr 1.7fr 40px;gap:7px;align-items:center;border-bottom:1px solid #edf2f6;padding:9px 0}.pos3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.pos3 select{padding:8px 4px;font-size:12px}.info-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--navy);font-weight:900;font-size:16px}.admin-only{display:none}.admin-mode .admin-only{display:inline-flex}.syncbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:10px 0 4px}.syncstate{font-size:11px;color:var(--muted);padding:6px 8px;border-radius:999px;background:#eef3f7}.syncstate.ok{background:#e6f6ee;color:#147748}.syncstate.warn{background:#fff3d9;color:#8a6518}.roster-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.modal{position:fixed;inset:0;background:rgba(10,25,40,.55);z-index:100;display:none;align-items:flex-end;justify-content:center}.modal.open{display:flex}.sheet{width:min(620px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sheet-head h2{margin:0}.close-btn{border:0;background:#eef3f7;border-radius:50%;width:38px;height:38px;font-size:20px}.field{margin-bottom:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.dangerbox{margin-top:14px;padding-top:12px;border-top:1px solid #edf2f6}.admin-status{font-size:12px;color:var(--muted)}
 .roster-row:last-child{border-bottom:0}
 .name{font-weight:800}
 .statuses{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -64,7 +66,7 @@ textarea{min-height:80px;resize:vertical}
 .footerin{max-width:620px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:420px){
   .court{height:570px} .pos{min-width:92px} .lab{font-size:12px} .ag{left:13%;top:15%} .ad{left:87%;top:15%} .gb{top:89%;width:48%}
-  .roster-row{grid-template-columns:1fr 1.7fr 54px}.pos3{gap:4px}.pos3 select{padding:7px 2px;font-size:11px}.roster-row input{padding:8px 4px;font-size:12px}
+  .roster-row{grid-template-columns:1fr 1.75fr 38px}.pos3{gap:4px}.pos3 select{padding:7px 2px;font-size:11px}
 }
 
 .calendar-row{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid #edf2f6}
@@ -93,14 +95,19 @@ textarea{min-height:80px;resize:vertical}
 <main>
 <section id="effectif" class="tab active">
   <div class="card section">
-    <h2>Effectif fixe</h2>
-    <div class="note">La liste est intégrée à l'application. Chaque joueur peut avoir jusqu’à 3 postes sur le terrain.</div>
+    <h2>Effectif</h2>
+    <div class="note">Effectif partagé entre tous les utilisateurs. Les joueurs sont triés automatiquement par ordre alphabétique.</div>
+    <div class="syncbar">
+      <span id="syncState" class="syncstate warn">Mode local</span>
+      <span id="adminStatus" class="admin-status">Lecture seule</span>
+    </div>
+    <div class="roster-tools">
+      <button id="adminLogin" class="btn ghost">🔒 Connexion admin</button>
+      <button id="adminLogout" class="btn ghost admin-only">Déconnexion</button>
+      <button id="addPlayer" class="btn green admin-only">＋ Ajouter un joueur</button>
+      <button id="importLocal" class="btn ghost admin-only">Importer mes postes locaux</button>
+    </div>
     <div id="roster"></div>
-  </div>
-  <div class="card section">
-    <h3>Calendrier officiel</h3>
-    <div class="note" style="margin-bottom:9px">1ère Division Masculine Territoriale — saison 2026-2027.</div>
-    <a class="btn ghost linkbtn" href="https://www.ffhandball.fr/competitions/saison-2026-2027-22/departemental/1ere-division-masculine-territoriale-32715/poule-192782/" target="_blank" rel="noopener">Ouvrir le calendrier FFHandball ↗</a>
   </div>
 </section>
 
@@ -179,6 +186,49 @@ textarea{min-height:80px;resize:vertical}
 </section>
 </main>
 
+
+<div id="playerModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="playerModalTitle">Fiche joueur</h2>
+      <button class="close-btn" data-close="playerModal">×</button>
+    </div>
+    <input id="playerId" type="hidden">
+    <div class="field"><label>Nom du joueur</label><input id="playerNameField" placeholder="Prénom N."></div>
+    <div class="field">
+      <label>Postes (jusqu’à 3)</label>
+      <div class="pos3">
+        <select id="playerPos1"></select>
+        <select id="playerPos2"></select>
+        <select id="playerPos3"></select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Latéralité</label><select id="playerLaterality"><option value="">—</option><option>Droitier</option><option>Gaucher</option><option>Ambidextre</option></select></div>
+      <div class="field"><label>N° de maillot</label><input id="playerJersey" inputmode="numeric" placeholder="Ex. 7"></div>
+    </div>
+    <div class="field"><label>Informations sportives</label><textarea id="playerNote" placeholder="Ex. poste préféré, particularité de jeu…"></textarea></div>
+    <div class="actions admin-only">
+      <button id="savePlayer" class="btn primary">Enregistrer</button>
+      <button id="deletePlayer" class="btn red">Supprimer</button>
+    </div>
+    <div id="playerReadOnlyNote" class="note">Consultation uniquement.</div>
+  </div>
+</div>
+
+<div id="loginModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2>Connexion responsable</h2>
+      <button class="close-btn" data-close="loginModal">×</button>
+    </div>
+    <div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username"></div>
+    <div class="field"><label>Mot de passe</label><input id="adminPassword" type="password" autocomplete="current-password"></div>
+    <button id="doLogin" class="btn primary" style="width:100%">Se connecter</button>
+    <div id="loginMessage" class="note" style="margin-top:8px"></div>
+  </div>
+</div>
+
 <div class="footerbar">
   <div class="footerin">
     <button id="quickConv" class="btn green">📋 Convocation</button>
@@ -189,7 +239,10 @@ textarea{min-height:80px;resize:vertical}
 
 <script>
 (function(){
-const DEFAULT_PLAYERS=["Hugo J.", "Landry R.", "Kevin B.", "Arthur C.", "PAD", "Cedric P.", "Ovic", "Antho C.", "Eddy C.", "Erwan N.", "Nico C.", "Adrien J.", "Micka G.", "Arnaud V.", "Joffrey B.", "Christo G.", "Arthur M.", "Peter D.", "Loup G."];
+let DEFAULT_PLAYERS=["Hugo J.","Landry R.","Kevin B.","Arthur C.","PAD","Cedric P.","Ovic","Antho C.","Eddy C.","Erwan N.","Nico C.","Adrien J.","Micka G.","Arnaud V.","Joffrey B.","Christo G.","Arthur M.","Peter D.","Loup G."].sort((a,b)=>a.localeCompare(b,'fr'));
+let PLAYER_RECORDS={};
+let supabaseClient=null;
+let isAdmin=false;
 const KEY='hb_v2_state_1';
 const POSITIONS=['GB','AG','ARG','DC','ARD','AD','PIV'];
 let state={
@@ -214,6 +267,59 @@ function load(){
 }
 function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function setSync(text,kind){
+  const el=document.getElementById('syncState');
+  el.textContent=text; el.className='syncstate '+(kind||'');
+}
+function applyAdminUI(){
+  document.body.classList.toggle('admin-mode',isAdmin);
+  document.getElementById('adminStatus').textContent=isAdmin?'Mode responsable':'Lecture seule';
+}
+function configured(){
+  const c=window.APP_CONFIG||{};
+  return !!(c.SUPABASE_URL && c.SUPABASE_ANON_KEY);
+}
+async function initBackend(){
+  if(!configured()){
+    setSync('Mode local','warn'); applyAdminUI(); return false;
+  }
+  try{
+    supabaseClient=window.supabase.createClient(
+      window.APP_CONFIG.SUPABASE_URL,
+      window.APP_CONFIG.SUPABASE_ANON_KEY,
+      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+    );
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    isAdmin=!!session; applyAdminUI();
+    await loadPlayersFromCloud();
+    setSync('Effectif partagé','ok');
+    return true;
+  }catch(e){
+    setSync('Connexion impossible','warn');
+    return false;
+  }
+}
+async function loadPlayersFromCloud(){
+  if(!supabaseClient) return;
+  const {data,error}=await supabaseClient.from('players').select('*').eq('active',true).order('name',{ascending:true});
+  if(error) throw error;
+  if(data && data.length){
+    PLAYER_RECORDS={};
+    data.forEach(p=>PLAYER_RECORDS[p.name]=p);
+    DEFAULT_PLAYERS=data.map(p=>p.name).sort((a,b)=>a.localeCompare(b,'fr'));
+    DEFAULT_PLAYERS.forEach(n=>{
+      if(!state.roster[n]) state.roster[n]={positions:[],number:''};
+      state.roster[n].positions=(PLAYER_RECORDS[n].positions||[]).slice(0,3);
+      if(!state.statuses[n]) state.statuses[n]='';
+    });
+    Object.keys(state.statuses).forEach(n=>{if(!DEFAULT_PLAYERS.includes(n)) delete state.statuses[n];});
+    renderAll();
+  }
+}
+function renderAll(){
+  renderRoster(); renderConvocation(); renderSelects(); renderBench(); renderShare();
+}
+
 function tab(name){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===name));
   document.querySelectorAll('.tabbtn').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
@@ -226,22 +332,32 @@ document.getElementById('showConvocation').onclick=()=>tab('convocation');
 
 function renderRoster(){
   const el=document.getElementById('roster'); el.innerHTML='';
-  const opts='<option value="">—</option><option>GB</option><option>AG</option><option>ARG</option><option>DC</option><option>ARD</option><option>AD</option><option>PIV</option>';
-  DEFAULT_PLAYERS.forEach(name=>{
+  const opts='<option value="">—</option>'+POSITIONS.map(p=>'<option>'+p+'</option>').join('');
+  DEFAULT_PLAYERS.slice().sort((a,b)=>a.localeCompare(b,'fr')).forEach(name=>{
+    const rec=PLAYER_RECORDS[name]||{};
     const d=state.roster[name]||{positions:[],number:''};
+    const positions=(rec.positions||d.positions||[]).slice(0,3);
     const row=document.createElement('div'); row.className='roster-row';
     row.innerHTML='<div class="name">'+esc(name)+'</div>'+
       '<div class="pos3"><select class="rpos">'+opts+'</select><select class="rpos">'+opts+'</select><select class="rpos">'+opts+'</select></div>'+
-      '<input class="rnum" inputmode="numeric" placeholder="N°" value="'+esc(d.number||'')+'">';
+      '<button class="info-btn" type="button" aria-label="Informations '+esc(name)+'">i</button>';
     const sels=[...row.querySelectorAll('.rpos')];
     sels.forEach((ps,i)=>{
-      ps.value=(d.positions||[])[i]||'';
-      ps.onchange=()=>{
-        state.roster[name].positions=[...new Set(sels.map(s=>s.value).filter(Boolean))].slice(0,3);
-        save(); renderRoster(); renderConvocation(); renderSelects();
+      ps.value=positions[i]||'';
+      ps.disabled=!isAdmin;
+      ps.onchange=async()=>{
+        const next=[...new Set(sels.map(s=>s.value).filter(Boolean))].slice(0,3);
+        state.roster[name].positions=next; save();
+        if(supabaseClient && isAdmin && rec.id){
+          const {error}=await supabaseClient.from('players').update({positions:next}).eq('id',rec.id);
+          if(error){alert('Erreur de sauvegarde : '+error.message); return;}
+          await loadPlayersFromCloud();
+        }else{
+          renderConvocation(); renderSelects();
+        }
       };
     });
-    row.querySelector('.rnum').oninput=e=>{state.roster[name].number=e.target.value;save();renderShare();renderSelects();};
+    row.querySelector('.info-btn').onclick=()=>openPlayerModal(name);
     el.appendChild(row);
   });
 }
@@ -255,7 +371,7 @@ function renderConvocation(){
   DEFAULT_PLAYERS.forEach(name=>{
     const row=document.createElement('div'); row.className='roster-row';
     const st=state.statuses[name]||'';
-    row.innerHTML='<div><div class="name">'+esc(name)+'</div><small class="note">'+esc((((state.roster[name]||{}).positions||[]).join(' • '))||'Poste non renseigné')+'</small></div>'+
+    row.innerHTML='<div><div class="name">'+esc(name)+'</div><small class="note">'+esc((((PLAYER_RECORDS[name]||{}).positions||(state.roster[name]||{}).positions||[]).join(' • '))||'Poste non renseigné')+'</small></div>'+
       '<div class="statuses" style="grid-column:2/4">'+
       '<button class="status conv '+(st==='conv'?'on':'')+'">Convoqué</button>'+
       '<button class="status maybe '+(st==='maybe'?'on':'')+'">Incertain</button>'+
@@ -272,7 +388,7 @@ function eligibleFor(pos){
   const conv=DEFAULT_PLAYERS.filter(n=>state.statuses[n]==='conv');
   const source=conv.length?conv:DEFAULT_PLAYERS;
   return source.filter(n=>{
-    const ps=(state.roster[n]||{}).positions||[];
+    const ps=(PLAYER_RECORDS[n]||{}).positions||(state.roster[n]||{}).positions||[];
     return ps.length===0 || ps.includes(pos);
   });
 }
@@ -285,7 +401,7 @@ function renderSelects(){
       sel.innerHTML='<option value="">+</option>';
       eligibleFor(pos).forEach(name=>{
         const o=document.createElement('option'); o.value=name;
-        const num=(state.roster[name]||{}).number;
+        const num=(PLAYER_RECORDS[name]||{}).jersey_number||(state.roster[name]||{}).number;
         o.textContent=(num?'#'+num+' ':'')+name;
         sel.appendChild(o);
       });
@@ -395,7 +511,7 @@ function renderShare(){
   lines.push('');
   lines.push('✅ Convoqués ('+conv.length+') :');
   conv.forEach(n=>{
-    const num=(state.roster[n]||{}).number;
+    const num=(PLAYER_RECORDS[n]||{}).jersey_number||(state.roster[n]||{}).number;
     lines.push('• '+(num?'#'+num+' ':'')+n);
   });
   if(maybe.length){lines.push('');lines.push('🟠 Incertains : '+maybe.join(', '));}
@@ -410,7 +526,93 @@ document.getElementById('copyText').onclick=async()=>{
 document.getElementById('resetStatuses').onclick=()=>{ if(confirm('Réinitialiser les statuts de convocation ?')){state.statuses={};DEFAULT_PLAYERS.forEach(n=>state.statuses[n]='');save();renderConvocation();renderSelects();renderShare();} };
 document.getElementById('clearLineup').onclick=()=>{state.lineup={};save();renderSelects();};
 
-load(); renderRoster(); initCalendar(); renderConvocation(); renderSelects(); renderShare();
+
+function posOptions(){
+  return '<option value="">—</option>'+POSITIONS.map(p=>'<option>'+p+'</option>').join('');
+}
+['playerPos1','playerPos2','playerPos3'].forEach(id=>document.getElementById(id).innerHTML=posOptions());
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+
+function openPlayerModal(name){
+  const rec=PLAYER_RECORDS[name]||{id:'',name:name,positions:(state.roster[name]||{}).positions||[],laterality:'',jersey_number:'',public_note:''};
+  document.getElementById('playerModalTitle').textContent=name?'Fiche de '+name:'Nouveau joueur';
+  document.getElementById('playerId').value=rec.id||'';
+  document.getElementById('playerNameField').value=rec.name||'';
+  document.getElementById('playerLaterality').value=rec.laterality||'';
+  document.getElementById('playerJersey').value=rec.jersey_number||'';
+  document.getElementById('playerNote').value=rec.public_note||'';
+  const ps=rec.positions||[];
+  ['playerPos1','playerPos2','playerPos3'].forEach((id,i)=>document.getElementById(id).value=ps[i]||'');
+  ['playerNameField','playerLaterality','playerJersey','playerNote','playerPos1','playerPos2','playerPos3'].forEach(id=>document.getElementById(id).disabled=!isAdmin);
+  document.getElementById('deletePlayer').style.display=(isAdmin && rec.id)?'inline-flex':'none';
+  document.getElementById('playerReadOnlyNote').style.display=isAdmin?'none':'block';
+  openModal('playerModal');
+}
+
+document.getElementById('adminLogin').onclick=()=>openModal('loginModal');
+document.getElementById('doLogin').onclick=async()=>{
+  if(!supabaseClient){document.getElementById('loginMessage').textContent='Base Supabase non configurée.';return;}
+  const email=document.getElementById('adminEmail').value.trim();
+  const password=document.getElementById('adminPassword').value;
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){document.getElementById('loginMessage').textContent=error.message;return;}
+  isAdmin=true; applyAdminUI(); closeModal('loginModal'); renderRoster();
+};
+document.getElementById('adminLogout').onclick=async()=>{
+  if(supabaseClient) await supabaseClient.auth.signOut();
+  isAdmin=false; applyAdminUI(); renderRoster();
+};
+document.getElementById('addPlayer').onclick=()=>openPlayerModal('');
+document.getElementById('savePlayer').onclick=async()=>{
+  if(!supabaseClient || !isAdmin) return;
+  const id=document.getElementById('playerId').value;
+  const name=document.getElementById('playerNameField').value.trim();
+  if(!name){alert('Indique le nom du joueur.');return;}
+  const positions=['playerPos1','playerPos2','playerPos3'].map(id=>document.getElementById(id).value).filter(Boolean);
+  const payload={
+    name,
+    positions:[...new Set(positions)].slice(0,3),
+    laterality:document.getElementById('playerLaterality').value,
+    jersey_number:document.getElementById('playerJersey').value.trim(),
+    public_note:document.getElementById('playerNote').value.trim(),
+    active:true
+  };
+  let q=id?supabaseClient.from('players').update(payload).eq('id',id):supabaseClient.from('players').insert(payload);
+  const {error}=await q;
+  if(error){alert('Erreur : '+error.message);return;}
+  closeModal('playerModal');
+  await loadPlayersFromCloud();
+};
+document.getElementById('deletePlayer').onclick=async()=>{
+  if(!supabaseClient || !isAdmin) return;
+  const id=document.getElementById('playerId').value;
+  const name=document.getElementById('playerNameField').value.trim();
+  if(!id || !confirm('Supprimer '+name+' de l’effectif partagé ?')) return;
+  const {error}=await supabaseClient.from('players').delete().eq('id',id);
+  if(error){alert('Erreur : '+error.message);return;}
+  delete state.statuses[name]; delete state.roster[name]; save();
+  closeModal('playerModal');
+  await loadPlayersFromCloud();
+};
+document.getElementById('importLocal').onclick=async()=>{
+  if(!supabaseClient || !isAdmin) return;
+  if(!confirm('Envoyer les postes enregistrés sur cet iPhone vers l’effectif partagé ?')) return;
+  for(const name of DEFAULT_PLAYERS){
+    const rec=PLAYER_RECORDS[name];
+    const local=(state.roster[name]||{}).positions||[];
+    if(rec && local.length){
+      await supabaseClient.from('players').update({positions:local.slice(0,3)}).eq('id',rec.id);
+    }
+  }
+  await loadPlayersFromCloud();
+  alert('Postes importés.');
+};
+
+load(); renderRoster(); initCalendar(); renderConvocation(); renderSelects(); renderShare(); applyAdminUI(); initBackend();
+
 })();
 </script>
 <script>
